@@ -19,3 +19,5 @@ build/
 dist/
 *.egg-info/
 *.pdf
+data_temp/
+doc_ADK_agent/  

@@ -98,5 +98,25 @@
       "Provides python script",
       "Does not call any domain skills"
     ]
+  },
+  {
+    "case_id": "data_001",
+    "input": "Can you download the last 30 days of market data for NVDA and plot it?",
+    "expected_skill": "data_skill",
+    "expected_tool_calls": [
+      {
+        "tool": "fetch_market_data",
+        "args": {
+          "ticker": "NVDA"
+        }
+      }
+    ],
+    "expected_output_format": "concise_summary",
+    "rubric": [
+      "Mentions NVDA",
+      "Lists the parquet file path",
+      "Lists the png file path",
+      "Does not print the raw dataframe"
+    ]
   }
 ]

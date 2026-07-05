@@ -28,6 +28,7 @@ root_agent = Agent(
         "- Learn about Greeks, volatility, and option strategies.\n"
         "- Get information about publicly listed companies.\n"
         "- Price vanilla options and explain the results in plain language.\n"
+        "- Retrieve, visualize, and save historical market data.\n"
         "What would you like to do today?"
     )
 )
