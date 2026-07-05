@@ -33,3 +33,7 @@ app/.adk/
 *.log
 .google-agents-cli/
 
+# Dashboard Frontend
+dashboard_frontend/node_modules/
+dashboard_frontend/dist/
+.DS_Store

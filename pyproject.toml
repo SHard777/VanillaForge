@@ -17,6 +17,10 @@ dependencies = [
     "yfinance",
     "seaborn",
     "matplotlib",
+    "fastapi>=0.139.0",
+    "uvicorn>=0.49.0",
+    "websockets>=15.0.1",
+    "pyarrow>=24.0.0",
 ]
 
 [project.optional-dependencies]

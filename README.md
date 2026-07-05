@@ -66,6 +66,70 @@ Model Context Protocol (MCP) servers run independently and provide the agent wit
 
 ---
 
+## Standalone Dashboard Architecture
+
+The VanillaForge Dashboard provides an **Agent-to-User Interface (A2UI)** financial terminal while **keeping the original ADK Web fully functional**. It converts a stateless CLI agent into a fully reactive, 6-panel financial terminal using FastAPI and React.
+
+### 1. Dashboard Layout & Component Architecture
+The frontend uses a CSS Grid layout mimicking modern financial terminals (e.g., Bloomberg).
+
+```text
++-------------------------+-----------------------------------------+
+| [Top-Left]              | [Top-Right]                             |
+| Main Chat               | Historical Market Data Chart            |
+| (Websocket to Agent)    | (ECharts; Time-Series OHLC plotting)    |
++-------------------------+-----------------------------------------+
+| [Middle-Left]           | [Middle-Right]                          |
+| Option Pricer           | Company Information                     |
+| (Inputs, Greeks, &      | (Explicit financial metrics,            |
+| BSM theoretical price)  | valuation, business segments)           |
++-------------------------+-----------------------------------------+
+| [Bottom-Left]           | [Bottom-Right]                          |
+| News Sentiment          | MCP Trade & Sentiment Journal           |
+| (Recent Headlines/Score)| (Dropdown: Trade / Sentiment tables)    |
++-------------------------+-----------------------------------------+
+```
+
+### 2. The "A2UI" Event Protocol
+To achieve Progressive Disclosure, the agent emits structured UI commands alongside its text using a **clearly identifiable fenced code block format**. This ensures perfect backward compatibility with ADK Web and CLI tools (which safely render the block as text), while the React dashboard visually intercepts the block and routes the JSON payload directly to the UI gauges.
+
+| Skill Name | Dashboard Panel | A2UI Data Flow |
+| :--- | :--- | :--- |
+| `VanillaForge_agent` | **Top-Left (Chat)** | Streams text chunks directly to the chat log. |
+| `data_skill` | **Top-Right (Chart)** | Agent returns a Parquet file path. Frontend fetches JSON from `/api/data/chart` and plots interactive graph. |
+| `pricing_skill` | **Middle-Left (Pricer)** | Agent returns BSM outputs. Frontend populates form inputs and renders Greeks gauges/metrics. |
+| `company_information_skill`| **Middle-Right (Info)** | Agent returns company metadata. Frontend updates profile cards. |
+| `news_sentiment_skill` | **Bottom-Left (News)** | Agent returns sentiment score. Frontend updates sentiment dial and news list. |
+| `memory_trade_sentiment` | **Bottom-Right (Journal)**| Frontend polls `/api/mcp/journal` directly to populate DataTables via MCP stdio. |
+
+### 3. Data Flow Diagram
+The backend (FastAPI) acts as a lightweight wrapper that orchestrates the streaming LLM response and the internal UI event triggers.
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant F as Frontend (React)
+    participant B as Backend (FastAPI)
+    participant A as ADK Agent
+    participant S as Skills and MCP
+
+    U->>F: "Plot AAPL chart"
+    F->>B: WebSocket /chat: "Plot AAPL"
+    B->>A: invoke(VanillaForge_agent)
+    A->>S: execute(data_skill)
+    S-->>A: parquet path
+    A-->>B: Text + [ui_action: UPDATE_CHART, ticker: AAPL]
+    B-->>F: Streamed Response
+    F->>U: Displays text in chat
+    F->>B: GET /api/data/chart?ticker=AAPL
+    B->>S: Read Parquet file
+    S-->>B: Dataframe
+    B-->>F: JSON Time-Series Data
+    F->>U: Renders interactive Top-Right Chart
+```
+
+---
+
 ## Getting Started
 
 ### 1. Prerequisites
@@ -133,3 +197,20 @@ agents-cli playground
 Once started, the terminal will print the exact local URL. Typically, you can open your browser and navigate to:
 [http://127.0.0.1:8080/dev-ui/?app=app](http://127.0.0.1:8080/dev-ui/?app=app)
 *(Note: If port 8080 is already in use on your machine, the terminal output will provide the alternative port number).*
+
+### Standalone Local Web Dashboard
+To launch the custom interactive VanillaForge local web dashboard, you will need to start both the backend API and the frontend UI in two separate terminals. These commands are the same for all platforms (**Windows / macOS / Linux**).
+
+**Terminal 1 (Backend API):**
+```bash
+uv run uvicorn dashboard_backend.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+**Terminal 2 (Frontend UI):**
+```bash
+cd dashboard_frontend
+npm install
+npm run dev
+```
+
+Then open your browser and navigate to the provided local URL. For example **[http://localhost:5173](http://localhost:5173)** to access the dashboard.

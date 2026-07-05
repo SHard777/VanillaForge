@@ -109,22 +109,44 @@ def black_scholes_pricing(
             else:
                 delta = -1.0 if S < K else 0.0
             result = {
-                "price": price,
-                "delta": delta,
+                "price": float(price) if isinstance(price, (np.ndarray, np.float64)) else price,
+                "delta": float(delta) if isinstance(delta, (np.ndarray, np.float64)) else delta,
                 "gamma": 0.0,
                 "theta": 0.0,
                 "vega": 0.0,
                 "rho": 0.0,
-                "S": S,
-                "K": K,
-                "T": T,
-                "r": r,
-                "sigma": sigma,
+                "S": float(S) if isinstance(S, (np.ndarray, np.float64)) else S,
+                "K": float(K) if isinstance(K, (np.ndarray, np.float64)) else K,
+                "T": float(T) if isinstance(T, (np.ndarray, np.float64)) else T,
+                "r": float(r) if isinstance(r, (np.ndarray, np.float64)) else r,
+                "sigma": float(sigma) if isinstance(sigma, (np.ndarray, np.float64)) else sigma,
                 "option_type": opt_type,
-                "q": q,
+                "q": float(q) if isinstance(q, (np.ndarray, np.float64)) else q,
             }
             if date_retrieved:
                 result["date_retrieved"] = date_retrieved
+            
+            import json
+            a2ui_payload = {
+                "ui_action": "UPDATE_PRICER",
+                "data": {
+                    "type": opt_type.capitalize(),
+                    "spot": result["S"],
+                    "strike": result["K"],
+                    "vol": result["sigma"],
+                    "rate": result["r"],
+                    "div_yield": result["q"],
+                    "maturity": result["T"],
+                    "price": result["price"],
+                    "delta": result["delta"],
+                    "gamma": result["gamma"],
+                    "vega": result["vega"],
+                    "theta": result["theta"],
+                    "rho": result["rho"]
+                }
+            }
+            result["_A2UI_INSTRUCTION"] = f"CRITICAL: You MUST include the following exact markdown block at the very end of your response to the user:\n```a2ui\n{json.dumps(a2ui_payload)}\n```"
+
             return result
         # If T is an array, we could use np.where, but for simplicity of the agent usage,
         # we will let the normal numpy math continue, since T=1e-9 is protected below.
@@ -185,4 +207,26 @@ def black_scholes_pricing(
     }
     if date_retrieved:
         result["date_retrieved"] = date_retrieved
+
+    import json
+    a2ui_payload = {
+        "ui_action": "UPDATE_PRICER",
+        "data": {
+            "type": opt_type.capitalize(),
+            "spot": result["S"],
+            "strike": result["K"],
+            "vol": result["sigma"],
+            "rate": result["r"],
+            "div_yield": result["q"],
+            "maturity": result["T"],
+            "price": result["price"],
+            "delta": result["delta"],
+            "gamma": result["gamma"],
+            "vega": result["vega"],
+            "theta": result["theta"],
+            "rho": result["rho"]
+        }
+    }
+    result["_A2UI_INSTRUCTION"] = f"CRITICAL: You MUST include the following exact markdown block at the very end of your response to the user:\n```a2ui\n{json.dumps(a2ui_payload)}\n```"
+
     return result

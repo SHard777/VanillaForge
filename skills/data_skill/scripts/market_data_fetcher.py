@@ -17,8 +17,13 @@ def fetch_market_data(
     try:
         # 1. Download Data
         ticker_obj = yf.Ticker(ticker)
-        if start_date and end_date:
-            df = ticker_obj.history(start=start_date, end=end_date)
+        try:
+            company_name = ticker_obj.info.get("longName", ticker)
+        except Exception:
+            company_name = ticker
+
+        if start_date:
+            df = ticker_obj.history(start=start_date)
         else:
             df = ticker_obj.history(
                 period="1y"
@@ -74,7 +79,7 @@ def fetch_market_data(
             json.dump(metadata, f, indent=4)
 
         # 6. Return Concise Summary
-        return {
+        result = {
             "status": "success",
             "ticker": ticker,
             "message": "Historical market data successfully retrieved.",
@@ -87,6 +92,13 @@ def fetch_market_data(
             "rows": len(df),
             "available_fields": ["Date"] + list(df.columns),
         }
+        
+        a2ui_payload = {
+            "ui_action": "UPDATE_CHART",
+            "data": { "ticker": ticker, "company_name": company_name }
+        }
+        result["_A2UI_INSTRUCTION"] = f"CRITICAL: You MUST include the following exact markdown block at the very end of your response to the user:\n```a2ui\n{json.dumps(a2ui_payload)}\n```"
+        return result
 
     except Exception as e:
         return {"error": f"Failed to fetch market data: {str(e)}"}

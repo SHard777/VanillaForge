@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-app text-textPrimary antialiased selection:bg-brand selection:text-white;
+  }
+}
+
+/* Custom scrollbar for dark mode aesthetic */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-app;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-borderRing rounded-full hover:bg-textSecondary transition-colors;
+}
