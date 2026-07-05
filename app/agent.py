@@ -8,7 +8,9 @@ from app.skill_loader import load_dynamic_skills
 # Auto-discover tools from the skills/ directory (just like Antigravity IDE!)
 discovered_tools = load_dynamic_skills()
 
-# The Main Agent handles conversation and dynamically selects tools based on user intent
+# The Main Agent handles conversation and dynamically selects tools based on user intent.
+# [ARCHITECTURE NOTE] We intentionally use a single deterministic orchestration engine (locked at temperature=0.1) 
+# instead of a brittle node-routing graph. Tools are dynamically loaded from `skills/` ensuring loose coupling.
 root_agent = Agent(
     name="VanillaForge_agent",
     model=DEFAULT_MODEL,

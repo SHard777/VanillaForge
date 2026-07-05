@@ -67,6 +67,10 @@ def load_dynamic_skills() -> List[Callable]:
                                 if metadata.get("description"):
                                     attr.__doc__ = metadata.get("description") + "\n\n" + str(attr.__doc__ or "")
                                 
+                                # [ARCHITECTURE NOTE] Automated Progressive Disclosure:
+                                # Instead of stuffing massive instructions into the main agent's system prompt (which causes 
+                                # context memory rot and hallucination), we intercept the tool's return payload. 
+                                # We only inject the heavy `__agent_instructions__` markdown *after* the specific skill is used.
                                 # Wrap the function for automated Progressive Disclosure
                                 @functools.wraps(attr)
                                 def progressive_disclosure_wrapper(*args, _orig_attr=attr, _sys_inst=system_instruction, **kwargs):
