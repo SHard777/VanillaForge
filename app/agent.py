@@ -29,6 +29,7 @@ root_agent = Agent(
         "- Get information about publicly listed companies.\n"
         "- Price vanilla options and explain the results in plain language.\n"
         "- Retrieve, visualize, and save historical market data.\n"
+        "- Get the market sentiment for an equity.\n"
         "What would you like to do today?"
     )
 )
