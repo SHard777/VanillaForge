@@ -12,6 +12,11 @@ dependencies = [
     "pypdf>=6.14.2",
     "python-dotenv",
     "pyyaml>=6.0",
+    "mcp>=1.0.0",
+    "pandas",
+    "yfinance",
+    "seaborn",
+    "matplotlib",
 ]
 
 [project.optional-dependencies]
