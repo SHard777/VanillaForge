@@ -96,6 +96,12 @@ Run the install command to sync package dependencies (**Windows / macOS / Linux*
 agents-cli install
 ```
 
+### 4. Build the Local Database
+Before running the agent, you need to ingest the options PDFs into the local Chroma vector database. Run the following command (**Windows / macOS / Linux**):
+```bash
+uv run python scripts/ingest_pdfs.py
+```
+
 ---
 
 ## Running the Agent
