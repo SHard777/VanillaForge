@@ -50,8 +50,8 @@ def black_scholes_pricing(
             import json
             client = Client()
             prompt = (
-                f"Find the current live stock price and 30-day At-The-Money (ATM) implied volatility for the ticker {ticker}. "
-                "Return ONLY a valid JSON object with keys 'S' (spot price as float), 'sigma' (volatility as float, e.g., 0.35), and 'date_retrieved' (string, the current date/time the data was found). "
+                f"Find the current live stock price, 30-day At-The-Money (ATM) implied volatility, and the trailing dividend yield for the ticker {ticker}. "
+                "Return ONLY a valid JSON object with keys 'S' (spot price as float), 'sigma' (volatility as float, e.g., 0.35), 'q' (dividend yield as float, e.g., 0.042 for 4.2%), and 'date_retrieved' (string, the current date/time the data was found). "
                 "Do not include markdown blocks or any other text."
             )
             response = client.models.generate_content(
@@ -71,6 +71,8 @@ def black_scholes_pricing(
                 S = float(data.get("S", 100.0))
             if sigma is None:
                 sigma = float(data.get("sigma", 0.30))
+            if q == 0.0:
+                q = float(data.get("q", 0.0))
             date_retrieved = data.get("date_retrieved", None)
         except Exception:
             pass
@@ -153,24 +155,7 @@ def black_scholes_pricing(
     gamma = (np.exp(-q * T) * pdf_d1) / (S * sigma * np.sqrt(T))
     vega = S * np.exp(-q * T) * np.sqrt(T) * pdf_d1
 
-    # Progressive disclosure: Read SKILL.md and append instructions to the response
-    import os
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    skill_md_path = os.path.join(os.path.dirname(current_dir), "SKILL.md")
-    
-    system_instruction = ""
-    if os.path.exists(skill_md_path):
-        with open(skill_md_path, "r", encoding="utf-8") as f:
-            content = f.read()
-            if content.startswith("---"):
-                end_idx = content.find("---", 3)
-                if end_idx != -1:
-                    system_instruction = content[end_idx+3:].strip()
-            else:
-                system_instruction = content.strip()
-
     result = {
-        "__agent_instructions__": f"IMPORTANT: Use the following guidelines to format your response to the user:\n\n{system_instruction}",
         "price": price,
         "delta": delta,
         "gamma": gamma,

@@ -1,6 +1,7 @@
 import os
 import yaml
 import importlib.util
+import functools
 from typing import List, Callable
 
 def load_dynamic_skills() -> List[Callable]:
@@ -25,18 +26,22 @@ def load_dynamic_skills() -> List[Callable]:
         if not os.path.exists(skill_md_path):
             continue
             
-        # Parse YAML frontmatter
+        # Parse YAML frontmatter and extract instructions body
         metadata = {}
+        system_instruction = ""
         with open(skill_md_path, "r", encoding="utf-8") as f:
             content = f.read()
             if content.startswith("---"):
                 end_idx = content.find("---", 3)
                 if end_idx != -1:
                     yaml_content = content[3:end_idx].strip()
+                    system_instruction = content[end_idx+3:].strip()
                     try:
                         metadata = yaml.safe_load(yaml_content)
                     except yaml.YAMLError:
                         pass
+            else:
+                system_instruction = content.strip()
         
         # Now dynamically load scripts inside scripts/ folder
         scripts_dir = os.path.join(skill_path, "scripts")
@@ -61,5 +66,15 @@ def load_dynamic_skills() -> List[Callable]:
                                 # We optionally inject the YAML description into the docstring
                                 if metadata.get("description"):
                                     attr.__doc__ = metadata.get("description") + "\n\n" + str(attr.__doc__ or "")
-                                tools.append(attr)
+                                
+                                # Wrap the function for automated Progressive Disclosure
+                                @functools.wraps(attr)
+                                def progressive_disclosure_wrapper(*args, _orig_attr=attr, _sys_inst=system_instruction, **kwargs):
+                                    result = _orig_attr(*args, **kwargs)
+                                    if isinstance(result, dict) and _sys_inst:
+                                        if "__agent_instructions__" not in result:
+                                            result["__agent_instructions__"] = f"IMPORTANT: Use the following guidelines to format your response to the user:\n\n{_sys_inst}"
+                                    return result
+                                
+                                tools.append(progressive_disclosure_wrapper)
     return tools

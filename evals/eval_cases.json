@@ -138,5 +138,27 @@
       "Outputs Final Sentiment Score out of 100",
       "Assigns appropriate classifications (e.g. Positive, Neutral)"
     ]
+  },
+  {
+    "case_id": "pricing_003",
+    "input": "Price a 1-year call option on CVX with a strike of 150.",
+    "expected_skill": "pricing_skill",
+    "expected_tool_calls": [
+      {
+        "tool": "black_scholes_pricing",
+        "args": {
+          "ticker": "CVX",
+          "K": 150,
+          "T": 1.0,
+          "option_type": "call"
+        }
+      }
+    ],
+    "expected_output_format": "markdown_table_and_explanation",
+    "rubric": [
+      "Mentions CVX",
+      "Mentions dividend yield in the assumption table",
+      "Provides option premium"
+    ]
   }
 ]

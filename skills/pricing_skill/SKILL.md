@@ -9,6 +9,7 @@ description: |
   * Default Volatility: 30% (0.30)
   * Default Maturity: 6 months (0.5 years)
   * Default Risk-Free Rate: 4% (0.04)
+  * Default Dividend Yield: 0% (0.0)
   Do NOT use for defining what the Greeks mean or for fetching company financial metrics.
 ---
 # Pricing Skill - Vanilla Options Valuation & Greeks Analysis
@@ -21,10 +22,11 @@ This skill is responsible for extracting option pricing parameters from user req
     *   Strike Price ($K$)
     *   Time to Maturity ($T$, in years or converted from days/months)
     *   Risk-free Interest Rate ($r$, as a decimal)
+    *   Dividend Yield ($q$, as a decimal)
     *   Volatility ($\sigma$, as a decimal)
     *   Option Type (Call or Put)
 2.  **Assumption Handling:** 
-    *   State all assumptions and any live search results (Spot Price, Implied Volatility) clearly in the output so the user is informed of exactly what inputs were used for the calculation.
+    *   State all assumptions (including Dividend Yield) and any live search results (Spot Price, Implied Volatility, Dividend Yield) clearly in the output so the user is informed of exactly what inputs were used for the calculation.
 3.  **Output Interpretation:** Translate the raw numbers computed by the BSM model:
     *   Explain the resulting option premium.
     *   Explain what the computed Greeks (Delta, Gamma, Theta, Vega, Rho) mean for this specific option.

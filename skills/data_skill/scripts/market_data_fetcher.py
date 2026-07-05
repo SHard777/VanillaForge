@@ -68,23 +68,8 @@ def fetch_market_data(ticker: str, start_date: str = None, end_date: str = None)
         with open(json_path, 'w', encoding='utf-8') as f:
             json.dump(metadata, f, indent=4)
 
-        # Progressive disclosure: Read SKILL.md and append instructions to the response
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        skill_md_path = os.path.join(os.path.dirname(current_dir), "SKILL.md")
-        system_instruction = ""
-        if os.path.exists(skill_md_path):
-            with open(skill_md_path, "r", encoding="utf-8") as f:
-                content = f.read()
-                if content.startswith("---"):
-                    end_idx = content.find("---", 3)
-                    if end_idx != -1:
-                        system_instruction = content[end_idx+3:].strip()
-                else:
-                    system_instruction = content.strip()
-
         # 6. Return Concise Summary
         return {
-            "__agent_instructions__": f"IMPORTANT: Use the following guidelines to format your response to the user:\n\n{system_instruction}",
             "status": "success",
             "ticker": ticker,
             "message": "Historical market data successfully retrieved.",
