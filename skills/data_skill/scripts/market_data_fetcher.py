@@ -6,9 +6,12 @@ import yfinance as yf
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-def fetch_market_data(ticker: str, start_date: str = None, end_date: str = None) -> dict:
+
+def fetch_market_data(
+    ticker: str, start_date: str = None, end_date: str = None
+) -> dict:
     """
-    Downloads historical market data using yfinance, persists it locally as Parquet, 
+    Downloads historical market data using yfinance, persists it locally as Parquet,
     generates a chart, and returns file paths and metadata.
     """
     try:
@@ -17,7 +20,9 @@ def fetch_market_data(ticker: str, start_date: str = None, end_date: str = None)
         if start_date and end_date:
             df = ticker_obj.history(start=start_date, end=end_date)
         else:
-            df = ticker_obj.history(period="1y") # Default to 1 year if no dates provided
+            df = ticker_obj.history(
+                period="1y"
+            )  # Default to 1 year if no dates provided
 
         if df.empty:
             return {"error": f"No data found for ticker '{ticker}'."}
@@ -26,7 +31,9 @@ def fetch_market_data(ticker: str, start_date: str = None, end_date: str = None)
         df.index = pd.to_datetime(df.index)
 
         # 2. Setup Directory
-        project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+        project_root = os.path.dirname(
+            os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        )
         temp_dir = os.path.join(project_root, "data_temp", ticker)
         os.makedirs(temp_dir, exist_ok=True)
 
@@ -43,7 +50,7 @@ def fetch_market_data(ticker: str, start_date: str = None, end_date: str = None)
         # 4. Generate Plot
         sns.set_theme(style="darkgrid")
         plt.figure(figsize=(10, 6))
-        sns.lineplot(x=df.index, y=df['Close'], label='Close Price')
+        sns.lineplot(x=df.index, y=df["Close"], label="Close Price")
         plt.title(f"Historical Closing Prices: {ticker}")
         plt.xlabel("Date")
         plt.ylabel("Closing Price")
@@ -53,8 +60,6 @@ def fetch_market_data(ticker: str, start_date: str = None, end_date: str = None)
         plt.close()
 
         # 5. Metadata JSON
-        actual_start = df.index.min().strftime("%Y-%m-%d")
-        actual_end = df.index.min().strftime("%Y-%m-%d") # Oops bug wait I should fix this inline: min then max
 
         metadata = {
             "ticker": ticker,
@@ -62,10 +67,10 @@ def fetch_market_data(ticker: str, start_date: str = None, end_date: str = None)
             "start_date": df.index.min().strftime("%Y-%m-%d"),
             "end_date": df.index.max().strftime("%Y-%m-%d"),
             "row_count": len(df),
-            "available_columns": list(df.columns)
+            "available_columns": list(df.columns),
         }
-        
-        with open(json_path, 'w', encoding='utf-8') as f:
+
+        with open(json_path, "w", encoding="utf-8") as f:
             json.dump(metadata, f, indent=4)
 
         # 6. Return Concise Summary
@@ -77,10 +82,10 @@ def fetch_market_data(ticker: str, start_date: str = None, end_date: str = None)
                 parquet_path.replace(project_root + os.sep, ""),
                 csv_path.replace(project_root + os.sep, ""),
                 png_path.replace(project_root + os.sep, ""),
-                json_path.replace(project_root + os.sep, "")
+                json_path.replace(project_root + os.sep, ""),
             ],
             "rows": len(df),
-            "available_fields": ["Date"] + list(df.columns)
+            "available_fields": ["Date"] + list(df.columns),
         }
 
     except Exception as e:

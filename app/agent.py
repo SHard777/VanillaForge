@@ -1,4 +1,3 @@
-from google.adk.tools import google_search
 from google.adk.agents import Agent
 from google.adk.apps import App
 from google.genai import types
@@ -15,7 +14,7 @@ memory_mcp = McpToolset(
     connection_params=StdioConnectionParams(
         server_params=StdioServerParameters(
             command="uv",
-            args=["run", "python", "mcp_servers/memory_trade_sentiment/server.py"]
+            args=["run", "python", "mcp_servers/memory_trade_sentiment/server.py"],
         )
     )
 )
@@ -24,7 +23,7 @@ memory_mcp = McpToolset(
 all_agent_tools = discovered_tools + [memory_mcp]
 
 # The Main Agent handles conversation and dynamically selects tools based on user intent.
-# [ARCHITECTURE NOTE] We intentionally use a single deterministic orchestration engine (locked at temperature=0.1) 
+# [ARCHITECTURE NOTE] We intentionally use a single deterministic orchestration engine (locked at temperature=0.1)
 # instead of a brittle node-routing graph. Tools are dynamically loaded from `skills/` ensuring loose coupling.
 root_agent = Agent(
     name="VanillaForge_agent",
@@ -51,7 +50,7 @@ root_agent = Agent(
         "- Log and track your options trades from trading journal.\n"
         "- Review your previously logged market sentiments from the sentiment journal.\n"
         "What would you like to do today?"
-    )
+    ),
 )
 
 # Exposed App instance for agents-cli run/playground

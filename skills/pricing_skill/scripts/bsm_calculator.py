@@ -6,7 +6,7 @@ def std_normal_cdf(x):
     """Computes the Cumulative Distribution Function (CDF) of standard normal distribution."""
     if isinstance(x, (int, float)):
         return 0.5 * (1.0 + math.erf(x / np.sqrt(2.0)))
-    
+
     # Vectorize math.erf for numpy arrays
     vectorized_erf = np.vectorize(math.erf)
     return 0.5 * (1.0 + vectorized_erf(x / np.sqrt(2.0)))
@@ -18,7 +18,14 @@ def std_normal_pdf(x):
 
 
 def black_scholes_pricing(
-    S: float = None, K: float = 100.0, T: float = 0.5, r: float = 0.04, sigma: float = None, option_type: str = "call", q: float = 0.0, ticker: str = ""
+    S: float = None,
+    K: float = 100.0,
+    T: float = 0.5,
+    r: float = 0.04,
+    sigma: float = None,
+    option_type: str = "call",
+    q: float = 0.0,
+    ticker: str = "",
 ) -> dict:
     """
     Computes the Black-Scholes-Merton option price and Greeks (Delta, Gamma, Theta, Vega, Rho)
@@ -48,6 +55,7 @@ def black_scholes_pricing(
         try:
             from google.genai import Client, types
             import json
+
             client = Client()
             prompt = (
                 f"Find the current live stock price, 30-day At-The-Money (ATM) implied volatility, and the trailing dividend yield for the ticker {ticker}. "
@@ -59,13 +67,16 @@ def black_scholes_pricing(
                 contents=prompt,
                 config=types.GenerateContentConfig(
                     tools=[types.Tool(google_search=types.GoogleSearch())],
-                    temperature=0.0
-                )
+                    temperature=0.0,
+                ),
             )
             text = response.text.strip()
-            if text.startswith("```json"): text = text[7:]
-            if text.startswith("```"): text = text[3:]
-            if text.endswith("```"): text = text[:-3]
+            if text.startswith("```json"):
+                text = text[7:]
+            if text.startswith("```"):
+                text = text[3:]
+            if text.endswith("```"):
+                text = text[:-3]
             data = json.loads(text.strip())
             if S is None:
                 S = float(data.get("S", 100.0))
@@ -115,7 +126,7 @@ def black_scholes_pricing(
             if date_retrieved:
                 result["date_retrieved"] = date_retrieved
             return result
-        # If T is an array, we could use np.where, but for simplicity of the agent usage, 
+        # If T is an array, we could use np.where, but for simplicity of the agent usage,
         # we will let the normal numpy math continue, since T=1e-9 is protected below.
         T = np.maximum(T, 1e-9)
 
@@ -141,7 +152,9 @@ def black_scholes_pricing(
         # Rho for Call
         rho = K * T * np.exp(-r * T) * cdf_d2
     else:  # put
-        price = K * np.exp(-r * T) * std_normal_cdf(-d2) - S * np.exp(-q * T) * std_normal_cdf(-d1)
+        price = K * np.exp(-r * T) * std_normal_cdf(-d2) - S * np.exp(
+            -q * T
+        ) * std_normal_cdf(-d1)
         delta = np.exp(-q * T) * (cdf_d1 - 1.0)
         # Theta for Put
         theta = (
