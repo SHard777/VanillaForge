@@ -45,6 +45,31 @@
     ]
   },
   {
+    "case_id": "pricing_002",
+    "input": "Price a put option with S=100, K=95, 6 months to expiry, 4% risk-free rate, 25% volatility, and a continuous dividend yield of 3%.",
+    "expected_skill": "pricing_skill",
+    "expected_tool_calls": [
+      {
+        "tool": "black_scholes_pricing",
+        "args": {
+          "S": 100,
+          "K": 95,
+          "T": 0.5,
+          "r": 0.04,
+          "sigma": 0.25,
+          "option_type": "put",
+          "q": 0.03
+        }
+      }
+    ],
+    "expected_output_format": "markdown_table_and_explanation",
+    "rubric": [
+      "Provides option premium",
+      "Mentions dividend yield in explanation or table",
+      "Provides Greeks"
+    ]
+  },
+  {
     "case_id": "documentation_001",
     "input": "What does Vega mean in options trading?",
     "expected_skill": "documentation_skill",
