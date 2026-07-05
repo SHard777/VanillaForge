@@ -1,0 +1,27 @@
+[project]
+name = "vanillaforge-agent"
+version = "0.1.0"
+description = "Vanilla Options Derivative Agent using ADK 2.0"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "chromadb>=1.5.9",
+    "google-adk>=2.0.0a0",
+    "pydantic>=2.0.0",
+    "pypdf>=6.14.2",
+    "python-dotenv",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+lint = [
+    "ruff",
+    "mypy",
+]
+test = [
+    "pytest",
+    "pytest-asyncio",
+]
+
+[tool.setuptools]
+packages = ["app"]

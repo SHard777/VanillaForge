@@ -1,0 +1,77 @@
+[
+  {
+    "case_id": "company_info_001",
+    "input": "Tell me about Tesla's business model and financial performance.",
+    "expected_skill": "company_information_skill",
+    "expected_tool_calls": [
+      {
+        "tool": "get_company_profile",
+        "args": {
+          "company_name": "Tesla"
+        }
+      }
+    ],
+    "expected_output_format": "6_point_structure",
+    "rubric": [
+      "Mentions business model",
+      "Mentions competitors",
+      "Contains a 6-point structured list",
+      "Includes financial metrics"
+    ]
+  },
+  {
+    "case_id": "pricing_001",
+    "input": "Price a call option for stock currently at 150, strike 160, 1 year to expiry, 5% risk-free rate, 20% volatility.",
+    "expected_skill": "pricing_skill",
+    "expected_tool_calls": [
+      {
+        "tool": "black_scholes_pricing",
+        "args": {
+          "S": 150,
+          "K": 160,
+          "T": 1.0,
+          "r": 0.05,
+          "sigma": 0.20,
+          "option_type": "call"
+        }
+      }
+    ],
+    "expected_output_format": "markdown_table_and_explanation",
+    "rubric": [
+      "Provides option premium",
+      "Includes a markdown table with inputs",
+      "Includes a markdown table with Greeks",
+      "Explains Delta and Gamma"
+    ]
+  },
+  {
+    "case_id": "documentation_001",
+    "input": "What does Vega mean in options trading?",
+    "expected_skill": "documentation_skill",
+    "expected_tool_calls": [
+      {
+        "tool": "search_options_documentation",
+        "args": {
+          "query": "Vega options trading definition"
+        }
+      }
+    ],
+    "expected_output_format": "academic_explanation",
+    "rubric": [
+      "Explains Vega as sensitivity to volatility",
+      "Uses academic or textbook tone",
+      "Does NOT provide a specific numerical price calculation"
+    ]
+  },
+  {
+    "case_id": "negative_boundary_001",
+    "input": "Write a python script to sort an array.",
+    "expected_skill": null,
+    "expected_tool_calls": [],
+    "expected_output_format": "standard_agent_response",
+    "rubric": [
+      "Provides python script",
+      "Does not call any domain skills"
+    ]
+  }
+]
