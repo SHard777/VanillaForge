@@ -1,53 +1,58 @@
 # VanillaForge Agent
 
-VanillaForge is a finance-focused conversational options derivatives agent built using the **ADK 2.0 Workflow Graph API**. It handles options derivative education, company information, and options pricing using the standard Black-Scholes-Merton model and analytical Greeks computations.
+VanillaForge is a high-precision financial analysis agent built on Google's **Agent Development Kit (ADK) 2.0**. Originally a generic options derivative conversational assistant, it has been heavily customized following the advanced "Agent Skills" from Google ADK architecture, specifically leveraging **Progressive Disclosure** and **Shift Intelligence Left** to minimize token usage, resolve issues before execution, and remain highly efficient and secure.
 
-## Architecture
+## Architecture Overview
 
-The agent is designed as a **single agent** utilizing a cyclic routing graph to manage multi-turn conversations:
+The agent is designed as a single, deterministic orchestration engine (`VanillaForge_agent`) locked at `temperature=0.1`. Instead of a complex, brittle routing graph, the agent dynamically discovers and loads independent tools from the `skills/` directory at runtime.
 
-```
+```text
                   [START]
                      │
-              [router_node]
-              /    │     \   \
-  "documentation"  │      \   "general" (fallback)
-        /    "company_info" \       \
-       ▼           ▼         ▼       ▼
- [doc_node]   [info_node] [pricing_node] [gen_node]
-       \           │         /       /
-        ▼          ▼        ▼       ▼
-              [responder_node] <─── Yields RequestInput (HITL)
+              [VanillaForge_agent]
+             /       │       \      \
+ (Calls Agent Skill) │        \      \ 
+           /         │         \      \
+          ▼          ▼          ▼      ▼
+   [pricing_skill] [data_skill] [documentation_skill] ...
+          │          │          │      │
+          ▼          ▼          ▼      ▼
+    [      skill_loader.py (SkillToolset)       ]
+    [ Injects __agent_instructions__ from YAML  ]
+          │          │          │      │
+           \         │         /      /
+            \        │        /      /
+             ▼       ▼       ▼      ▼
+              [VanillaForge_agent]
                      │
-              (User Resumes)
-                     │
-                     ▼
-              (Loops to Router)
+               (User Resumes)
 ```
 
-### Components
-*   **`config.py`**: Central model config (`gemini-3.1-flash-lite`) and SKILL.md loading utility.
-*   **`state.py`**: Declares Pydantic schemas for the shared `WorkflowState`.
-*   **`tools.py`**: Numerical Black-Scholes-Merton solver and option Greeks calculator.
-*   **`nodes.py`**: Workflow nodes for classification, educational skills, corporate context, options pricing, and response/interaction loop handling.
-*   **`agent.py`**: Configures the `Workflow` graph, wiring nodes, edges, and conditional routing.
-*   **`skills/`**: Contains the source of truth markdown guidelines (`SKILL.md`) for each individual skill.
-*   **`scripts/ingest_pdfs.py`**: Pipeline script to extract, chunk, and embed PDFs into the local ChromaDB database.
-*   **`Documents_options/`**: Drop folder for new PDF textbooks and references.
+### The `SkillToolset` Loader (`app/skill_loader.py`)
+At the core of the architecture is the automated `skill_loader.py`. 
+When the agent starts, it scans the `skills/` directory and parses the lightweight YAML metadata from each `SKILL.md` file. It then automatically intercepts tool execution to inject the heavy Markdown instructions (`__agent_instructions__`) into the payload *only when the skill is actually used*. This prevents "Context Rot" and keeps the agent fast and cheap.
+
+## Available Skills
+
+The `VanillaForge_agent` currently possesses 5 core capabilities:
+
+1. **`documentation_skill`**: Performs RAG over a local ChromaDB to answer complex educational options theory questions without hallucinating. Includes a built-in ingestion tool (`scripts/ingest_pdfs.py`) to easily drop new PDFs into `Documents_options/` and instantly expand the agent's knowledge base.
+2. **`company_information_skill`**: Scrapes and retrieves specific fundamental metadata about a publicly traded company.
+3. **`pricing_skill`**: A Black-Scholes-Merton (BSM) calculator. If the user omits inputs, an internal sub-agent seamlessly fetches the live Spot Price, Implied Volatility, and Dividend Yield from Google Search before computing the option premium and Greeks.
+4. **`data_skill`**: Uses `yfinance` to download historical market data, persists massive datasets locally as high-performance `.parquet` and `.csv` files, and generates `seaborn` pricing charts.
+5. **`news_sentiment_skill`**: Retrieves the top 10 most recent news articles for an equity and performs a rigid semantic sentiment analysis on each, returning a structured 0-100 score and thematic breakdown.
 
 ---
 
-## Knowledge Base (Local RAG)
+## Directory Structure
 
-The `documentation_skill` agent uses a local ChromaDB vector database to intelligently search academic papers and option textbooks to answer complex educational queries.
-
-To teach the agent new information:
-1. Place any new `.pdf` files into the `Documents_options/` directory.
-2. Run the ingestion pipeline from your terminal:
-   ```powershell
-   uv run python scripts/ingest_pdfs.py
-   ```
-This will automatically chunk the text, compute embeddings using `gemini-embedding-2`, and save them to the local database located at `skills/documentation_skill/.chroma_db/`. The agent will immediately have access to this new knowledge in your next conversation.
+*   **`app/agent.py`**: The central orchestrator Agent configuration and persona.
+*   **`app/skill_loader.py`**: The automated Progressive Disclosure framework loader.
+*   **`skills/`**: Contains the decoupled skill logic. Every skill has its own `SKILL.md` (metadata and instructions) and a `scripts/` folder containing the Python tools.
+*   **`scripts/ingest_pdfs.py`**: Pipeline script to extract, chunk, and embed new PDFs into the local ChromaDB database.
+*   **`Documents_options/`**: Drop folder for new PDF textbooks and references.
+*   **`evals/eval_cases.json`**: The test suite used for Evaluation-Driven Development (EDD) of all skills.
+*   **`tests/`**: Pytest assertions covering the agent flow and skill capabilities.
 
 ---
 
@@ -67,28 +72,7 @@ Duplicate the `.env_example` template:
 copy .env_example .env
 ```
 
-Open `.env` and choose one of the following methods:
-
-#### Option A: Google AI Studio API Key (Recommended)
-1. Get a key from [Google AI Studio](https://aistudio.google.com/).
-2. Uncomment the following lines in `.env` and set your key:
-   ```env
-   GEMINI_API_KEY="your_api_key"
-   GOOGLE_GENAI_USE_VERTEXAI=False
-   ```
-
-#### Option B: Google Cloud / Vertex AI
-1. Enable the Vertex AI API in the Google Cloud Console.
-2. Uncomment the following lines in `.env` and configure your project ID and region:
-   ```env
-   GOOGLE_CLOUD_PROJECT="your-gcp-project-id"
-   GOOGLE_CLOUD_LOCATION="us-central1"
-   GOOGLE_GENAI_USE_VERTEXAI=True
-   ```
-3. Authenticate your terminal session:
-   ```powershell
-   gcloud auth application-default login
-   ```
+Set your `GEMINI_API_KEY` in the `.env` file to authenticate with Google AI Studio.
 
 ### 3. Install Dependencies
 Run the install command to sync package dependencies:
@@ -100,26 +84,29 @@ agents-cli install
 
 ## Running the Agent
 
-### Command Line Smoke Test
-Run a quick test query from the command line:
+### Command Line Smoke Tests
+Run a quick educational test query:
 ```powershell
 agents-cli run "What is a call option?"
+```
+
+Test the advanced CVX pricing calculation (with automated dividend yield retrieval):
+```powershell
+agents-cli run "Price a 1-year call option on CVX with a strike of 150."
 ```
 
 ### Interactive Web Playground
 Launch the local web-based playground to chat with the agent. 
 
-On Windows (or within PowerShell), run the playground using the direct runner to prevent shell wildcard expansion errors:
+On Windows (or within PowerShell), run the playground using the direct runner:
 ```powershell
 uv run adk web . --host 127.0.0.1 --port 8080 --reload_agents
 ```
 
-On Linux/macOS, you can also run:
+On Linux/macOS, you can use the standard CLI runner:
 ```bash
 agents-cli playground
 ```
 
 Once started, open your browser and navigate to:
 [http://127.0.0.1:8080/dev-ui/?app=app](http://127.0.0.1:8080/dev-ui/?app=app)
-
-This opens the ADK Playground interface, allowing you to test multi-turn conversations and inspect the workflow's state transitions and execution path.
