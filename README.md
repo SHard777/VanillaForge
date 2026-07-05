@@ -4,7 +4,7 @@ VanillaForge is a high-precision financial analysis agent built on Google's **Ag
 
 ## Architecture Overview
 
-The agent is designed as a single, deterministic orchestration engine (`VanillaForge_agent`) locked at `temperature=0.1`. Instead of a complex, brittle routing graph, the agent dynamically discovers and loads independent tools from the `skills/` directory at runtime.
+The agent is designed as a single, deterministic orchestration engine (`VanillaForge_agent`) locked at `temperature=0.1`. Instead of a complex, brittle routing graph, the agent dynamically discovers and loads independent tools from the `skills/` directory at runtime only when needed, in order to save token usage and avoid context memory rot (hallucination).
 
 ```text
                   [START]
@@ -36,11 +36,11 @@ When the agent starts, it scans the `skills/` directory and parses the lightweig
 
 The `VanillaForge_agent` currently possesses 5 core capabilities:
 
-1. **`documentation_skill`**: Performs RAG over a local ChromaDB to answer complex educational options theory questions without hallucinating. Includes a built-in ingestion tool (`scripts/ingest_pdfs.py`) to easily drop new PDFs into `Documents_options/` and instantly expand the agent's knowledge base.
-2. **`company_information_skill`**: Scrapes and retrieves specific fundamental metadata about a publicly traded company.
-3. **`pricing_skill`**: A Black-Scholes-Merton (BSM) calculator. If the user omits inputs, an internal sub-agent seamlessly fetches the live Spot Price, Implied Volatility, and Dividend Yield from Google Search before computing the option premium and Greeks.
-4. **`data_skill`**: Uses `yfinance` to download historical market data, persists massive datasets locally as high-performance `.parquet` and `.csv` files, and generates `seaborn` pricing charts.
-5. **`news_sentiment_skill`**: Retrieves the top 10 most recent news articles for an equity and performs a rigid semantic sentiment analysis on each, returning a structured 0-100 score and thematic breakdown.
+1. **`documentation_skill`**: **Reads options textbooks to teach you financial theory.** It performs RAG over a local ChromaDB to answer complex educational options theory questions without hallucinating. Includes also a built-in ingestion tool (`scripts/ingest_pdfs.py`) to easily drop new PDFs into `Documents_options/` and instantly expand the agent's knowledge base.
+2. **`company_information_skill`**: **Fetches basic company profiles and financials.** It scrapes and retrieves specific fundamental metadata about a publicly traded company.
+3. **`pricing_skill`**: **Calculates the fair price and risk metrics of any strategy based on European vanilla options.** It acts as a Black-Scholes-Merton (BSM) calculator for European options. If the user omits inputs, an internal sub-agent seamlessly fetches the live Spot Price, Implied Volatility, and Dividend Yield from Google Search before computing the option premium and Greeks.
+4. **`data_skill`**: **Downloads historical market data and draws pricing charts.** It uses `yfinance` to download market data, persists massive datasets locally as high-performance `.parquet` and `.csv` files, and generates `seaborn` visualizations.
+5. **`news_sentiment_skill`**: **Reads the news to tell you if the market is bullish or bearish on a stock.** It retrieves the top 10 most recent news articles for an equity and performs a rigid semantic sentiment analysis on each, returning a structured 0-100 score and thematic breakdown.
 
 ---
 
