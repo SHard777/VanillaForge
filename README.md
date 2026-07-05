@@ -1,7 +1,24 @@
+
+
 # VanillaForge Agent
 
-VanillaForge is a high-precision financial analysis agent built on Google's **Agent Development Kit (ADK) 2.0**. Originally a generic options derivative conversational assistant, it has been heavily customized following the advanced "Agent Skills" from Google ADK architecture, specifically leveraging **Progressive Disclosure** and **Shift Intelligence Left** to minimize token usage, resolve issues before execution, and remain highly efficient and secure. 
+![VanillaForge Cat Trader](assets/funny_banker_cat3.jpg)
+
+VanillaForge is a high-precision financial analysis agent built on Google's **Agent Development Kit (ADK) 2.0**. 
+
+It offers profound expertise in derivatives by ingesting and referencing PDFs of financial textbooks and academic papers. VanillaForge can price any European options strategy, retrieve live and historical market data, generate interactive charts, and perform real-time sentiment analysis. Additionally, it features a persistent logging journal to track your theoretical trades and monitor how a company's market sentiment evolves over time.
+ 
+Originally a generic options derivative conversational assistant, it has been heavily customized following the advanced "Agent Skills" from Google ADK architecture, specifically leveraging **Progressive Disclosure** and **Shift Intelligence Left** to minimize token usage, resolve issues before execution, and remain highly efficient and secure. 
 In addition, it utilizes a dedicated local MCP server as a persistent long-term memory to log derivative trade strategies on demand, and track sentiment analysis over time for any equity of your choosing.
+
+
+**⚠️ Disclaimer: This recommendation is for educational purposes only and should not be considered financial advice.**
+
+This project forms part of the capstone submission for the Kaggle/Google Intensive Vibe Coding Capstone Project. I am deeply grateful to Google and the outstanding instructors for providing such a valuable program at the forefront of this disruptive technological revolution.
+
+The code and opinions expressed here are my own and do not represent Google or Kaggle.
+
+
 
 ## Architecture Overview
 
@@ -170,7 +187,7 @@ uv run python scripts/ingest_pdfs.py
 
 ---
 
-## Running the Agent
+## Running the ADK Agent
 
 ### Command Line Smoke Tests
 Run a quick educational test query (**Windows / macOS / Linux**):
@@ -183,8 +200,10 @@ Test the advanced CVX pricing calculation (with automated dividend yield retriev
 agents-cli run "Price a 1-year call option on CVX with a strike of 150."
 ```
 
-### Interactive Web Playground
+### Interactive ADK Web Playground
 Launch the local web-based playground to chat with the agent. 
+
+![ADK_Web](assets/ADK_Pricing_skill_example.png)
 
 **Windows:**
 ```bash
@@ -201,6 +220,10 @@ Once started, the terminal will print the exact local URL. Typically, you can op
 *(Note: If port 8080 is already in use on your machine, the terminal output will provide the alternative port number).*
 
 ### Standalone Local Web Dashboard
+
+![Dashboard local web](assets/Dashboard2.png)
+
+
 To launch the custom interactive VanillaForge local web dashboard, you will need to start both the backend API and the frontend UI in two separate terminals. These commands are the same for all platforms (**Windows / macOS / Linux**).
 
 **Terminal 1 (Backend API):**
