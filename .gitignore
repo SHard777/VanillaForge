@@ -21,6 +21,7 @@ dist/
 
 # Data and Models
 *.pdf
+!Documents_options/*.pdf
 data_temp/
 doc_ADK_agent/
 
