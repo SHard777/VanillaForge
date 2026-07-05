@@ -18,20 +18,21 @@ def std_normal_pdf(x):
 
 
 def black_scholes_pricing(
-    S, K, T, r, sigma, option_type: str, q: float = 0.0
+    S: float = None, K: float = 100.0, T: float = 0.5, r: float = 0.04, sigma: float = None, option_type: str = "call", q: float = 0.0, ticker: str = ""
 ) -> dict:
     """
     Computes the Black-Scholes-Merton option price and Greeks (Delta, Gamma, Theta, Vega, Rho)
     for European Call and Put options.
 
     Inputs:
-        S: Current stock price (underlying)
+        S: Current stock price (underlying). If None and ticker is provided, searches live data.
         K: Strike price
         T: Time to expiration in years (e.g. 0.5 for 6 months)
         r: Risk-free interest rate (as a decimal, e.g. 0.05 for 5%)
-        sigma: Implied volatility (as a decimal, e.g. 0.30 for 30%)
+        sigma: Implied volatility (as a decimal). If None and ticker is provided, searches live data.
         option_type: "call" or "put" (case-insensitive)
         q: Continuous dividend yield (as a decimal, e.g. 0.02 for 2%)
+        ticker: Optional stock ticker (e.g., TSLA) used to fetch live S and sigma if missing.
 
     Returns:
         dict containing 'price', 'delta', 'gamma', 'theta', 'vega', 'rho'.
@@ -39,6 +40,43 @@ def black_scholes_pricing(
     opt_type = option_type.lower().strip()
     if opt_type not in ("call", "put"):
         raise ValueError("option_type must be either 'call' or 'put'")
+
+    # Sub-Agent Encapsulation: Fetch missing S and sigma via Google Search
+    if (S is None or sigma is None) and ticker:
+        try:
+            from google.genai import Client, types
+            import json
+            client = Client()
+            prompt = (
+                f"Find the current live stock price and 30-day At-The-Money (ATM) implied volatility for the ticker {ticker}. "
+                "Return ONLY a valid JSON object with keys 'S' (spot price as float) and 'sigma' (volatility as float, e.g., 0.35). "
+                "Do not include markdown blocks or any other text."
+            )
+            response = client.models.generate_content(
+                model="gemini-3.1-flash-lite",
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    tools=[types.Tool(google_search=types.GoogleSearch())],
+                    temperature=0.0
+                )
+            )
+            text = response.text.strip()
+            if text.startswith("```json"): text = text[7:]
+            if text.startswith("```"): text = text[3:]
+            if text.endswith("```"): text = text[:-3]
+            data = json.loads(text.strip())
+            if S is None:
+                S = float(data.get("S", 100.0))
+            if sigma is None:
+                sigma = float(data.get("sigma", 0.30))
+        except Exception:
+            pass
+
+    # Static Fallbacks if search failed or no ticker was provided
+    if S is None:
+        S = 100.0
+    if sigma is None:
+        sigma = 0.30
 
     # Safeguard against invalid inputs
     S = np.maximum(S, 1e-9)
