@@ -118,5 +118,25 @@
       "Lists the png file path",
       "Does not print the raw dataframe"
     ]
+  },
+  {
+    "case_id": "news_sentiment_001",
+    "input": "What is the recent news sentiment for TSLA?",
+    "expected_skill": "news_sentiment_skill",
+    "expected_tool_calls": [
+      {
+        "tool": "fetch_recent_news",
+        "args": {
+          "ticker": "TSLA"
+        }
+      }
+    ],
+    "expected_output_format": "structured_report",
+    "rubric": [
+      "Outputs Article Breakdown with 0-100 scores",
+      "Outputs Company Sentiment Summary",
+      "Outputs Final Sentiment Score out of 100",
+      "Assigns appropriate classifications (e.g. Positive, Neutral)"
+    ]
   }
 ]
