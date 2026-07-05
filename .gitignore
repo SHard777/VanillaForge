@@ -29,3 +29,7 @@ doc_ADK_agent/
 vanillaforge_memory.db
 .chroma_db/
 app/.adk/
+# Logs and CLI
+*.log
+.google-agents-cli/
+
