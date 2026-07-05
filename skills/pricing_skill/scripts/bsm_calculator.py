@@ -41,6 +41,8 @@ def black_scholes_pricing(
     if opt_type not in ("call", "put"):
         raise ValueError("option_type must be either 'call' or 'put'")
 
+    date_retrieved = None
+
     # Sub-Agent Encapsulation: Fetch missing S and sigma via Google Search
     if (S is None or sigma is None) and ticker:
         try:
@@ -49,7 +51,7 @@ def black_scholes_pricing(
             client = Client()
             prompt = (
                 f"Find the current live stock price and 30-day At-The-Money (ATM) implied volatility for the ticker {ticker}. "
-                "Return ONLY a valid JSON object with keys 'S' (spot price as float) and 'sigma' (volatility as float, e.g., 0.35). "
+                "Return ONLY a valid JSON object with keys 'S' (spot price as float), 'sigma' (volatility as float, e.g., 0.35), and 'date_retrieved' (string, the current date/time the data was found). "
                 "Do not include markdown blocks or any other text."
             )
             response = client.models.generate_content(
@@ -69,6 +71,7 @@ def black_scholes_pricing(
                 S = float(data.get("S", 100.0))
             if sigma is None:
                 sigma = float(data.get("sigma", 0.30))
+            date_retrieved = data.get("date_retrieved", None)
         except Exception:
             pass
 
@@ -92,7 +95,7 @@ def black_scholes_pricing(
                 delta = 1.0 if S > K else 0.0
             else:
                 delta = -1.0 if S < K else 0.0
-            return {
+            result = {
                 "price": price,
                 "delta": delta,
                 "gamma": 0.0,
@@ -107,6 +110,9 @@ def black_scholes_pricing(
                 "option_type": opt_type,
                 "q": q,
             }
+            if date_retrieved:
+                result["date_retrieved"] = date_retrieved
+            return result
         # If T is an array, we could use np.where, but for simplicity of the agent usage, 
         # we will let the normal numpy math continue, since T=1e-9 is protected below.
         T = np.maximum(T, 1e-9)
@@ -163,7 +169,7 @@ def black_scholes_pricing(
             else:
                 system_instruction = content.strip()
 
-    return {
+    result = {
         "__agent_instructions__": f"IMPORTANT: Use the following guidelines to format your response to the user:\n\n{system_instruction}",
         "price": price,
         "delta": delta,
@@ -179,3 +185,6 @@ def black_scholes_pricing(
         "option_type": opt_type,
         "q": q,
     }
+    if date_retrieved:
+        result["date_retrieved"] = date_retrieved
+    return result

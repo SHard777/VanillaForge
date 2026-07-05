@@ -1,6 +1,7 @@
 from google.adk.tools import google_search
 from google.adk.agents import Agent
 from google.adk.apps import App
+from google.genai import types
 from app.config import DEFAULT_MODEL
 from app.skill_loader import load_dynamic_skills
 
@@ -12,6 +13,7 @@ root_agent = Agent(
     name="VanillaForge_agent",
     model=DEFAULT_MODEL,
     tools=discovered_tools,
+    generate_content_config=types.GenerateContentConfig(temperature=0.1),
     instruction=(
         "You are a finance-focused options derivatives conversational assistant. "
         "You have access to a variety of specialized skills (tools) such as pricing calculators, "
