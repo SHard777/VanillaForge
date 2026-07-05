@@ -2,7 +2,7 @@ import math
 import numpy as np
 
 
-def std_normal_cdf(x):
+def _std_normal_cdf(x):
     """Computes the Cumulative Distribution Function (CDF) of standard normal distribution."""
     if isinstance(x, (int, float)):
         return 0.5 * (1.0 + math.erf(x / np.sqrt(2.0)))
@@ -12,7 +12,7 @@ def std_normal_cdf(x):
     return 0.5 * (1.0 + vectorized_erf(x / np.sqrt(2.0)))
 
 
-def std_normal_pdf(x):
+def _std_normal_pdf(x):
     """Computes the Probability Density Function (PDF) of standard normal distribution."""
     return np.exp(-0.5 * x * x) / np.sqrt(2.0 * np.pi)
 
@@ -109,8 +109,12 @@ def black_scholes_pricing(
             else:
                 delta = -1.0 if S < K else 0.0
             result = {
-                "price": float(price) if isinstance(price, (np.ndarray, np.float64)) else price,
-                "delta": float(delta) if isinstance(delta, (np.ndarray, np.float64)) else delta,
+                "price": float(price)
+                if isinstance(price, (np.ndarray, np.float64))
+                else price,
+                "delta": float(delta)
+                if isinstance(delta, (np.ndarray, np.float64))
+                else delta,
                 "gamma": 0.0,
                 "theta": 0.0,
                 "vega": 0.0,
@@ -119,14 +123,18 @@ def black_scholes_pricing(
                 "K": float(K) if isinstance(K, (np.ndarray, np.float64)) else K,
                 "T": float(T) if isinstance(T, (np.ndarray, np.float64)) else T,
                 "r": float(r) if isinstance(r, (np.ndarray, np.float64)) else r,
-                "sigma": float(sigma) if isinstance(sigma, (np.ndarray, np.float64)) else sigma,
+                "sigma": float(sigma)
+                if isinstance(sigma, (np.ndarray, np.float64))
+                else sigma,
                 "option_type": opt_type,
                 "q": float(q) if isinstance(q, (np.ndarray, np.float64)) else q,
             }
             if date_retrieved:
                 result["date_retrieved"] = date_retrieved
-            
+
             import json
+            import requests
+
             a2ui_payload = {
                 "ui_action": "UPDATE_PRICER",
                 "data": {
@@ -142,10 +150,17 @@ def black_scholes_pricing(
                     "gamma": result["gamma"],
                     "vega": result["vega"],
                     "theta": result["theta"],
-                    "rho": result["rho"]
-                }
+                    "rho": result["rho"],
+                },
             }
-            result["_A2UI_INSTRUCTION"] = f"CRITICAL: You MUST include the following exact markdown block at the very end of your response to the user:\n```a2ui\n{json.dumps(a2ui_payload)}\n```"
+            try:
+                requests.post(
+                    "http://localhost:8000/api/internal/a2ui",
+                    json=a2ui_payload,
+                    timeout=0.5,
+                )
+            except Exception:
+                pass
 
             return result
         # If T is an array, we could use np.where, but for simplicity of the agent usage,
@@ -157,9 +172,9 @@ def black_scholes_pricing(
     d2 = d1 - sigma * np.sqrt(T)
 
     # Calculate CDF and PDF values
-    cdf_d1 = std_normal_cdf(d1)
-    cdf_d2 = std_normal_cdf(d2)
-    pdf_d1 = std_normal_pdf(d1)
+    cdf_d1 = _std_normal_cdf(d1)
+    cdf_d2 = _std_normal_cdf(d2)
+    pdf_d1 = _std_normal_pdf(d1)
 
     # Calculate price and Greeks based on type
     if opt_type == "call":
@@ -174,18 +189,18 @@ def black_scholes_pricing(
         # Rho for Call
         rho = K * T * np.exp(-r * T) * cdf_d2
     else:  # put
-        price = K * np.exp(-r * T) * std_normal_cdf(-d2) - S * np.exp(
+        price = K * np.exp(-r * T) * _std_normal_cdf(-d2) - S * np.exp(
             -q * T
-        ) * std_normal_cdf(-d1)
+        ) * _std_normal_cdf(-d1)
         delta = np.exp(-q * T) * (cdf_d1 - 1.0)
         # Theta for Put
         theta = (
             -(S * np.exp(-q * T) * pdf_d1 * sigma) / (2.0 * np.sqrt(T))
-            - q * S * np.exp(-q * T) * std_normal_cdf(-d1)
-            + r * K * np.exp(-r * T) * std_normal_cdf(-d2)
+            - q * S * np.exp(-q * T) * _std_normal_cdf(-d1)
+            + r * K * np.exp(-r * T) * _std_normal_cdf(-d2)
         )
         # Rho for Put
-        rho = -K * T * np.exp(-r * T) * std_normal_cdf(-d2)
+        rho = -K * T * np.exp(-r * T) * _std_normal_cdf(-d2)
 
     gamma = (np.exp(-q * T) * pdf_d1) / (S * sigma * np.sqrt(T))
     vega = S * np.exp(-q * T) * np.sqrt(T) * pdf_d1
@@ -209,6 +224,8 @@ def black_scholes_pricing(
         result["date_retrieved"] = date_retrieved
 
     import json
+    import requests
+
     a2ui_payload = {
         "ui_action": "UPDATE_PRICER",
         "data": {
@@ -224,9 +241,14 @@ def black_scholes_pricing(
             "gamma": result["gamma"],
             "vega": result["vega"],
             "theta": result["theta"],
-            "rho": result["rho"]
-        }
+            "rho": result["rho"],
+        },
     }
-    result["_A2UI_INSTRUCTION"] = f"CRITICAL: You MUST include the following exact markdown block at the very end of your response to the user:\n```a2ui\n{json.dumps(a2ui_payload)}\n```"
+    try:
+        requests.post(
+            "http://localhost:8000/api/internal/a2ui", json=a2ui_payload, timeout=0.5
+        )
+    except Exception:
+        pass
 
     return result

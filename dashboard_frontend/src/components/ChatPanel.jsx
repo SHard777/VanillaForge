@@ -44,17 +44,11 @@ export default function ChatPanel() {
           }
           return newMessages;
         });
+      } else if (data.type === 'a2ui') {
+        // Intercept direct A2UI JSON payloads from backend internal broadcast
+        dispatchA2UIEvent(data.payload.ui_action, data.payload.data);
       } else if (data.type === 'done') {
-        // When done, extract and execute any A2UI events
-        setMessages((prev) => {
-          const lastMsg = prev[prev.length - 1];
-          if (lastMsg && lastMsg.role === 'assistant') {
-            // Schedule the A2UI event dispatch to run AFTER the render cycle
-            // to prevent "Cannot update a component while rendering a different component"
-            setTimeout(() => executeA2UIEvents(lastMsg.rawContent), 0);
-          }
-          return prev;
-        });
+        setIsTyping(false);
       } else if (data.type === 'error') {
         console.error("Agent error:", data.content);
         setIsTyping(false);
@@ -71,26 +65,9 @@ export default function ChatPanel() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
-  // Strip A2UI blocks from being displayed, even if incomplete
+  // Strip A2UI blocks (legacy support in case LLM outputs it)
   const stripA2UI = (text) => {
     return text.replace(/```a2ui\n[\s\S]*?(```|$)/g, '').trim();
-  };
-
-  // Parse and dispatch A2UI events
-  const executeA2UIEvents = (text) => {
-    // Regex matches either ```a2ui or ```json followed by the payload
-    const regex = /```(?:a2ui|json)\n([\s\S]*?)```/g;
-    let match;
-    while ((match = regex.exec(text)) !== null) {
-      try {
-        const payload = JSON.parse(match[1]);
-        if (payload.ui_action && payload.data) {
-          dispatchA2UIEvent(payload.ui_action, payload.data);
-        }
-      } catch (e) {
-        console.error("Failed to parse A2UI JSON:", e);
-      }
-    }
   };
 
   const handleSend = (e) => {

@@ -49,8 +49,7 @@ root_agent = Agent(
         "- Get the market sentiment for an equity.\n"
         "- Log and track your options trades from trading journal.\n"
         "- Review your previously logged market sentiments from the sentiment journal.\n"
-        "What would you like to do today?\n\n"
-        "If a tool's output contains a '_A2UI_INSTRUCTION', you MUST include the exact markdown block (```a2ui ...```) verbatim at the very end of your final response to the user. Do not omit or modify it."
+        "What would you like to do today?"
     ),
 )
 

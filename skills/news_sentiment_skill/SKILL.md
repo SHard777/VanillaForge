@@ -9,64 +9,9 @@ version: 1.0.0
 # News Sentiment Skill
 
 ## Purpose & Scope
-This skill analyzes recent news sentiment for publicly listed companies. It retrieves the latest 10 news articles for a company (via an external tool), performs a semantic sentiment analysis on each article, identifies key themes, and provides a final aggregated sentiment score.
+This skill analyzes recent news sentiment for publicly listed companies. It retrieves the latest 10 news articles for a company, performs a semantic sentiment analysis on each article, identifies key themes, and provides a final aggregated sentiment score.
 
 ## Responsibilities
-1. **Tool Invocation:** Pass the target company ticker to the `fetch_recent_news` tool to retrieve the top 10 articles (headline, source, date, URL).
-2. **Sentiment Analysis (Per Article):** For each article returned, analyze the headline and assign a sentiment score from 0 to 100 based on the following scale:
-   - 0–20 = Very Negative
-   - 21–40 = Negative
-   - 41–60 = Neutral
-   - 61–80 = Positive
-   - 81–100 = Very Positive
-3. **Thematic Summary:** Analyze the collection of articles to identify key positive themes, negative themes, risks, and opportunities.
-4. **Final Scoring:** Compute an overall sentiment score (0-100) for the company based on the aggregate analysis.
-
-## Output Structure
-You MUST output the final response exactly according to the following structure:
-
-### 1. Article Breakdown
-For each article, display:
-- **Headline**: [The article headline]
-- **Source**: [The publication source]
-- **Date**: [The publication date, if available]
-- **Sentiment Score**: [0-100 score]/100
-- **Sentiment**: [Classification from the scale above]
-- **Rationale**: [Short 1-sentence rationale for why this score was assigned]
-
-### 2. Company Sentiment Summary
-Provide a consolidated summary containing:
-1. **Key positive themes**
-2. **Key negative themes**
-3. **Key risks identified**
-4. **Key opportunities identified**
-5. **A consolidated company sentiment summary**
-
-### 3. Final Sentiment Score
-Present the final aggregated score at the very end:
-- **Final Sentiment Score**: [0-100 score]/100
-- **Classification**: [Classification from the scale above]
-- **Summary**: [Brief 1-2 sentence justification for the final score]
-
-## Guidelines for Response Style
-- **Tone:** Professional and objective.
-- **Constraints:** Do NOT provide investment advice. Clearly distinguish between factual reporting and sentiment interpretation. Cite the news source for every article analyzed.
-
-### 4. A2UI Dashboard Payload
-CRITICAL: You MUST include the following exact markdown block at the very end of your response to the user so the VanillaForge Dashboard can update.
-Replace `[TICKER]` with the actual ticker, `[SCORE]` with a float between -1 and 1 (where 100 is 1.0 and 0 is -1.0, e.g., 50 is 0.0), and fill the headlines list.
-CRITICAL 2: You MUST include ALL headlines that were parsed and analyzed in this session inside the `headlines` array. Do NOT truncate the list to 2 items! If you fetched 10 headlines, include exactly 10 items in the array.
-```a2ui
-{
-  "ui_action": "UPDATE_SENTIMENT",
-  "data": {
-    "ticker": "[TICKER]",
-    "score": [SCORE],
-    "headlines": [
-      { "text": "Headline 1", "date": "Date 1", "sentiment": "positive/negative/neutral" },
-      { "text": "Headline 2", "date": "Date 2", "sentiment": "positive/negative/neutral" },
-      "... (Include ALL headlines here, do not truncate)"
-    ]
-  }
-}
-```
+1. **Tool Invocation:** Pass the target company ticker to the `fetch_recent_news` tool.
+2. **Output Formatting:** The `fetch_recent_news` tool will perform the full sentiment analysis and return a highly detailed, formatted string containing the article breakdown, company sentiment summary, and final sentiment score.
+3. **Response Delivery:** You MUST output the exact text returned by the `fetch_recent_news` tool directly to the user. Do NOT modify or summarize the text, and absolutely do NOT attempt to output any JSON payloads or A2UI blocks yourself. The tool handles all dashboard syncing internally.

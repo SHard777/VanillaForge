@@ -90,20 +90,20 @@ The frontend uses a CSS Grid layout mimicking modern financial terminals (e.g., 
 +-------------------------+-----------------------------------------+
 ```
 
-### 2. The "A2UI" Event Protocol
-To achieve Progressive Disclosure, the agent emits structured UI commands alongside its text using a **clearly identifiable fenced code block format**. This ensures perfect backward compatibility with ADK Web and CLI tools (which safely render the block as text), while the React dashboard visually intercepts the block and routes the JSON payload directly to the UI gauges.
+### 2. The Internal "A2UI" Webhook Protocol
+To achieve Progressive Disclosure without polluting the chat interface with raw JSON, the architecture relies on **Tool-emitted Internal Webhooks**. Instead of forcing the LLM to output UI commands, the underlying Python scripts (`fetch_profile`, `news_fetcher`, etc.) intercept the data internally. They fire a behind-the-scenes HTTP request directly to the FastAPI backend's internal endpoint (`/api/internal/a2ui`) to sync the React dashboard, and then strip the JSON away to return *only* beautiful, clean text to the Main Agent. This ensures a pristine chat experience in ADK Web/CLI while keeping the dashboard reactive in real-time.
 
 | Skill Name | Dashboard Panel | A2UI Data Flow |
 | :--- | :--- | :--- |
-| `VanillaForge_agent` | **Top-Left (Chat)** | Streams text chunks directly to the chat log. |
-| `data_skill` | **Top-Right (Chart)** | Agent returns a Parquet file path. Frontend fetches JSON from `/api/data/chart` and plots interactive graph. |
-| `pricing_skill` | **Middle-Left (Pricer)** | Agent returns BSM outputs. Frontend populates form inputs and renders Greeks gauges/metrics. |
-| `company_information_skill`| **Middle-Right (Info)** | Agent returns company metadata. Frontend updates profile cards. |
-| `news_sentiment_skill` | **Bottom-Left (News)** | Agent returns sentiment score. Frontend updates sentiment dial and news list. |
+| `VanillaForge_agent` | **Top-Left (Chat)** | Streams clean text directly to the chat log (No JSON). |
+| `data_skill` | **Top-Right (Chart)** | Tool POSTs webhook. Frontend fetches JSON from `/api/data/chart` and plots interactive graph. |
+| `pricing_skill` | **Middle-Left (Pricer)** | Tool POSTs BSM outputs via webhook. Frontend renders Greeks gauges/metrics. |
+| `company_information_skill`| **Middle-Right (Info)** | Tool POSTs company metadata via webhook. Frontend updates profile cards. |
+| `news_sentiment_skill` | **Bottom-Left (News)** | Tool POSTs sentiment score and headlines via webhook. Frontend updates sentiment dial. |
 | `memory_trade_sentiment` | **Bottom-Right (Journal)**| Frontend polls `/api/mcp/journal` directly to populate DataTables via MCP stdio. |
 
 ### 3. Data Flow Diagram
-The backend (FastAPI) acts as a lightweight wrapper that orchestrates the streaming LLM response and the internal UI event triggers.
+The backend (FastAPI) acts as a lightweight wrapper that orchestrates the streaming LLM response and handles internal UI event webhooks triggered by the tools.
 
 ```mermaid
 sequenceDiagram
@@ -111,16 +111,18 @@ sequenceDiagram
     participant F as Frontend (React)
     participant B as Backend (FastAPI)
     participant A as ADK Agent
-    participant S as Skills and MCP
+    participant S as Skills (Python Tools)
 
     U->>F: "Plot AAPL chart"
     F->>B: WebSocket /chat: "Plot AAPL"
     B->>A: invoke(VanillaForge_agent)
     A->>S: execute(data_skill)
-    S-->>A: parquet path
-    A-->>B: Text + [ui_action: UPDATE_CHART, ticker: AAPL]
+    S->>B: POST /api/internal/a2ui {ui_action: UPDATE_CHART}
+    B-->>F: WebSocket State Update (Updates Gauges)
+    S-->>A: Clean Markdown Text
+    A-->>B: Streamed Text Response (No JSON)
     B-->>F: Streamed Response
-    F->>U: Displays text in chat
+    F->>U: Displays clean text in chat
     F->>B: GET /api/data/chart?ticker=AAPL
     B->>S: Read Parquet file
     S-->>B: Dataframe

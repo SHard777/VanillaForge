@@ -27,6 +27,7 @@ dependencies = [
 lint = [
     "ruff",
     "mypy",
+    "codespell",
 ]
 test = [
     "pytest",

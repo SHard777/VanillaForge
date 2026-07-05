@@ -79,10 +79,15 @@ def fetch_market_data(
             json.dump(metadata, f, indent=4)
 
         # 6. Return Concise Summary
+        last_date = df.index.max().strftime("%Y-%m-%d")
+        last_close = df["Close"].iloc[-1]
+
         result = {
             "status": "success",
             "ticker": ticker,
             "message": "Historical market data successfully retrieved.",
+            "last_date": last_date,
+            "last_close_price": float(last_close),
             "files_created": [
                 parquet_path.replace(project_root + os.sep, ""),
                 csv_path.replace(project_root + os.sep, ""),
@@ -92,12 +97,21 @@ def fetch_market_data(
             "rows": len(df),
             "available_fields": ["Date"] + list(df.columns),
         }
-        
+
+        import requests
+
         a2ui_payload = {
             "ui_action": "UPDATE_CHART",
-            "data": { "ticker": ticker, "company_name": company_name }
+            "data": {"ticker": ticker, "company_name": company_name},
         }
-        result["_A2UI_INSTRUCTION"] = f"CRITICAL: You MUST include the following exact markdown block at the very end of your response to the user:\n```a2ui\n{json.dumps(a2ui_payload)}\n```"
+        try:
+            requests.post(
+                "http://localhost:8000/api/internal/a2ui",
+                json=a2ui_payload,
+                timeout=0.5,
+            )
+        except Exception:
+            pass
         return result
 
     except Exception as e:
