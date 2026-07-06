@@ -37,7 +37,7 @@ The code and opinions expressed here are my own and do not represent Google or K
 | Category | Technology |
 |:---|:---|
 | **Agent Framework** | Google ADK 2.0 |
-| **LLM** | Gemini (via Google AI Studio) |
+| **LLM** | Google Gemini  |
 | **MCP Server** | FastMCP + SQLite |
 | **RAG / Vector DB** | ChromaDB + PyPDF |
 | **Market Data** | yfinance + Pandas + PyArrow |
