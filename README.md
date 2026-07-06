@@ -239,3 +239,37 @@ npm run dev
 ```
 
 Then open your browser and navigate to the provided local URL. For example **[http://localhost:5173](http://localhost:5173)** to access the dashboard.
+
+---
+
+## Current Limitations
+
+- Currently supports European option pricing only.
+- Limited support for advanced derivatives and structured products.
+- Limited charting and visualization capabilities.
+- Company information is currently retrieved primarily through Google Search.
+- Sentiment analysis is performed on demand rather than continuously.
+- No portfolio-level aggregation of trades and Greeks.
+- Prototype deployment intended for demonstration purposes.
+
+
+---
+
+## Next Steps
+
+If I had more time, I would extend VanillaForge with the following capabilities and explore its evolution into a commercial-grade platform:
+
+- Support for more advanced derivatives and structured products beyond European options.
+- Visualization of payoff diagrams for complex option strategies directly within the dashboard.
+- Automated daily sentiment tracking for a configurable watchlist of equities.
+- Enhanced company intelligence, including richer financial metrics and fundamentals.
+- A comprehensive trading book with portfolio-level Greeks and risk analytics.
+- More advanced charting and analytics capabilities.
+- Improved dashboard user experience and interface design.
+- Cloud deployment and scaling on Google Cloud Platform.
+
+---
+
+## License
+
+This project is licensed under the Apache License, Version 2.0 - see the [LICENSE](LICENSE) file for details.
