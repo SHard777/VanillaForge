@@ -9,6 +9,7 @@ It offers deep expertise in financial derivatives by ingesting and referencing f
 **Key Capabilities:**
 * Deep expertise in derivatives
 * Pricing European option strategies
+* Delivering company financial and business insights
 * Retrieving live and historical market data
 * Generating interactive market charts
 * Computing option Greeks and risk metrics
@@ -24,6 +25,8 @@ In addition, it utilizes a dedicated local MCP server as a persistent long-term 
 **⚠️ Disclaimer: This recommendation is for educational purposes only and should not be considered financial advice.**
 
 This project forms part of the capstone submission for the Kaggle/Google Intensive Vibe Coding Capstone Project. I am deeply grateful to Google and the outstanding instructors for providing such a valuable program at the forefront of this disruptive technological revolution.
+
+A special thank you to my wonderful wife for her unwavering patience, support, and encouragement throughout this project. Your understanding, belief in me, and constant support during the many hours devoted to this work made all the difference.
 
 The code and opinions expressed here are my own and do not represent Google or Kaggle.
 
