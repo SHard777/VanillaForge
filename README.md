@@ -2,7 +2,7 @@
 
 ![VanillaForge Cat Trader](assets/funny_banker_cat3.jpg)
 
-VanillaForge is an AI-powered financial analysis and derivatives analytics agent built on Google's **Agent Development Kit (ADK) 2.0**. 
+VanillaForge is an AI-powered financial analysis and derivatives analytics agent built on Google's **Agent Development Kit (ADK) 2.0**, powered by **Gemini**, and developed with **Antigravity IDE** following modern **agentic engineering best practices**.
 
 It offers deep expertise in financial derivatives by ingesting and referencing financial textbooks and academic research papers. It can price a wide range of European option strategies, retrieve live and historical market data, access company financial information, generate interactive charts, perform real-time sentiment analysis, and suggest option strategies based on positive, neutral, or negative market expectations. Additionally, VanillaForge features a persistent journal that records theoretical trades and tracks how market sentiment evolves over time for selected companies.
 
