@@ -1,13 +1,22 @@
-
-
 # VanillaForge Agent
 
 ![VanillaForge Cat Trader](assets/funny_banker_cat3.jpg)
 
-VanillaForge is a high-precision financial analysis agent built on Google's **Agent Development Kit (ADK) 2.0**. 
+VanillaForge is an AI-powered financial analysis and derivatives analytics agent built on Google's **Agent Development Kit (ADK) 2.0**. 
 
-It offers profound expertise in derivatives by ingesting and referencing PDFs of financial textbooks and academic papers. VanillaForge can price any European options strategy, retrieve live and historical market data, generate interactive charts, and perform real-time sentiment analysis. Additionally, it features a persistent logging journal to track your theoretical trades and monitor how a company's market sentiment evolves over time.
- 
+It offers deep expertise in financial derivatives by ingesting and referencing financial textbooks and academic research papers. It can price a wide range of European option strategies, retrieve live and historical market data, access company financial information, generate interactive charts, perform real-time sentiment analysis, and suggest option strategies based on positive, neutral, or negative market expectations. Additionally, VanillaForge features a persistent journal that records theoretical trades and tracks how market sentiment evolves over time for selected companies.
+
+**Key Capabilities:**
+* Deep expertise in derivatives
+* Pricing European option strategies
+* Retrieving live and historical market data
+* Generating interactive market charts
+* Computing option Greeks and risk metrics
+* Suggesting strategies based on positive, neutral, or negative market expectations
+* Performing real-time market sentiment analysis
+* Maintaining a persistent journal of theoretical trades and sentiment observations
+
+
 Originally a generic options derivative conversational assistant, it has been heavily customized following the advanced "Agent Skills" from Google ADK architecture, specifically leveraging **Progressive Disclosure** and **Shift Intelligence Left** to minimize token usage, resolve issues before execution, and remain highly efficient and secure. 
 In addition, it utilizes a dedicated local MCP server as a persistent long-term memory to log derivative trade strategies on demand, and track sentiment analysis over time for any equity of your choosing.
 
