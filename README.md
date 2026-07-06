@@ -32,6 +32,23 @@ The code and opinions expressed here are my own and do not represent Google or K
 
 
 
+## Tech Stack
+
+| Category | Technology |
+|:---|:---|
+| **Agent Framework** | Google ADK 2.0 |
+| **LLM** | Gemini (via Google AI Studio) |
+| **MCP Server** | FastMCP + SQLite |
+| **RAG / Vector DB** | ChromaDB + PyPDF |
+| **Market Data** | yfinance + Pandas + PyArrow |
+| **Visualization** | Seaborn + Matplotlib |
+| **Backend API** | FastAPI + Uvicorn + WebSockets |
+| **Frontend** | React + Vite + Tailwind CSS |
+| **Package Manager** | uv |
+| **Testing** | Pytest + pytest-asyncio |
+| **Linting** | Ruff + Mypy + Codespell |
+
+
 ## Architecture Overview
 
 The agent is designed as a single, deterministic orchestration engine (`VanillaForge_agent`) locked at `temperature=0.1`. Instead of a complex, brittle routing graph, the agent dynamically discovers and loads independent tools from the `skills/` directory at runtime only when needed, in order to save token usage and avoid context memory rot (hallucination).
@@ -276,6 +293,7 @@ If I had more time, I would extend VanillaForge with the following capabilities 
 - Automated daily sentiment tracking for a configurable watchlist of equities.
 - Enhanced company intelligence, including richer financial metrics and fundamentals.
 - A comprehensive trading book with portfolio-level Greeks and risk analytics.
+- Leveraging historical trade and sentiment journals to generate personalized trading insights, analytics, and strategy suggestions.
 - More advanced charting and analytics capabilities.
 - Improved dashboard user experience and interface design.
 - Cloud deployment and scaling on Google Cloud Platform.
